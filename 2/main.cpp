@@ -51,9 +51,6 @@ int main(int argc, const char** argv) {
                     part.setTo(cv::Scalar(0, 255, 0));
                     break;
             }
-            // cv::imshow(std::to_string(id), part);
-            // cv::imshow(std::to_string(id) + "_mask", mask);
-            // cv::Mat roi = result(cv::Rect(j * segmentWidth, i * segmentHeight, segmentWidth, segmentHeight));
             cv::Mat roi = result(cv::Rect(0, 0, imageSize.width, imageSize.height));
             part.copyTo(roi, mask);
         }
