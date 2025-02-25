@@ -30,6 +30,25 @@ int main() {
     // cv::imshow("Result", result1);
     cv::imshow("Result", result2);
 
+    cv::Mat blurredImage;
+    result2.copyTo(blurredImage);
+    cv::cvtColor(blurredImage, blurredImage, cv::COLOR_HSV2BGR);
+    cv::cvtColor(blurredImage, blurredImage, cv::COLOR_BGR2GRAY);
+    cv::GaussianBlur(blurredImage, blurredImage, cv::Size(9, 9), 2); 
+    std::vector<cv::Vec3f> circles;
+    cv::HoughCircles(blurredImage, circles, cv::HOUGH_GRADIENT, 1.25, blurredImage.rows, 200, 30);
+
+    for(const auto& circle: circles) {
+        cv::Vec3i c = circle;
+        cv::Point center(c[0], c[1]);
+        int radius = c[2];
+        // Рисуем центр окружности
+        cv::circle(result2, center, 3, cv::Scalar(0, 255, 0), -1, cv::LINE_AA);
+        // Рисуем саму окружность
+        cv::circle(result2, center, radius, cv::Scalar(255, 0, 0), 2, cv::LINE_AA);
+    }
+
+    cv::imshow("Result", result2);
     // Ожидание, пока пользователь не закроет окно с изображением
     while((cv::waitKey() & 0xEFFFFF) != 27);
  
