@@ -27,7 +27,6 @@ int main() {
     cv::Mat edges;
     // cv::Canny(blurred, edges, 50, 150);
     cv::threshold(blurred, edges, 100, 255, cv::THRESH_BINARY);
-    cv::imshow("eee", edges);
 
     // Обнаружение контуров на основе бинарного изображения границ
     std::vector<std::vector<cv::Point>> contours;
@@ -59,7 +58,7 @@ int main() {
         }
 
         cv::putText(contourOutput, type, center, cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(0, 255, 0));
-        cv::putText(contourOutput, std::to_string(size), center + cv::Point(0, 50), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(0, 0, 255));
+        // cv::putText(contourOutput, std::to_string(size), center + cv::Point(0, 50), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(0, 0, 255));
     }
 
     cv::imshow("Исходное изображение", image);
