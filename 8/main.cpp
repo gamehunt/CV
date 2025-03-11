@@ -24,8 +24,8 @@ std::pair<std::string, cv::Scalar> identify(const std::vector<cv::Point>& contou
                 return std::make_pair("TRIANGLE", TRIANGLE_COLOR);
             case 4:
                 return std::make_pair("SQUARE", SQUARE_COLOR);
-            case 6:
             case 5:
+            case 6:
             case 7:
             case 8:
                 if(fabs(cv::minAreaRect(approx).angle - 45) < 5) {
@@ -35,9 +35,13 @@ std::pair<std::string, cv::Scalar> identify(const std::vector<cv::Point>& contou
                 }
         }
     } else {
+        if(approx.size() < 8) {
+            return std::make_pair("TRIANGLE", TRIANGLE_COLOR);
+        }
+
         auto rect = cv::boundingRect(approx);
         double aspect = 1.0 * rect.width / rect.height;
-        if(aspect > 1.25 || aspect < 0.9) {
+        if(aspect > 1.25 || aspect < 0.95) {
             return std::make_pair("W", W_COLOR);
         } else {
             return std::make_pair("CROSS", CROSS_COLOR);
