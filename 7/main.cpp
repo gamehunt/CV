@@ -1,5 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv4/opencv2/highgui.hpp>
+
+#define SIZE_MULTIPLIER 1.5
  
 int main() {
     cv::VideoCapture cap("samples/video.mp4");
@@ -7,7 +9,18 @@ int main() {
         std::cerr << "Ошибка: не удалось открыть видеофайл!" << std::endl;
         return -1;
     }
- 
+
+    int frame_width = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) * SIZE_MULTIPLIER);
+    int frame_height = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT) * SIZE_MULTIPLIER);
+    cv::Size frameSize(frame_width, frame_height);
+    
+    cv::VideoWriter writer("output.mp4", cv::VideoWriter::fourcc('a', 'v', 'c', '1'), 30, frameSize, true);
+    
+    if (!writer.isOpened()) {
+        std::cerr << "Ошибка: не удалось открыть файл для записи видео!" << std::endl;
+        return -1;
+    } 
+
     cv::Mat frame;
     while (true) {
         cap >> frame;
@@ -16,6 +29,7 @@ int main() {
             break;
         }
 
+        cv::resize(frame, frame, cv::Size(), SIZE_MULTIPLIER, SIZE_MULTIPLIER);
 
         cv::Mat processed;
         cv::cvtColor(frame, processed, cv::COLOR_BGR2GRAY);
@@ -44,12 +58,16 @@ int main() {
         }
 
         cv::imshow("video", frame);
+        writer.write(frame);
 
         if((cv::waitKey(30) & 0xEFFFFF) == 27) {
             break;
         }
     }
- 
+
+    writer.release();
+    cap.release(); // Освобождаем ресурс камеры
+    cv::destroyAllWindows();
  
     return 0;
 }
