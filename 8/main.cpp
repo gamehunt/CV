@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include <opencv4/opencv2/highgui.hpp>
+#include <utility>
 
 typedef std::vector<std::vector<cv::Point>> contour_wrapper;
 
@@ -16,31 +17,34 @@ std::pair<std::string, cv::Scalar> identify(const std::vector<cv::Point>& contou
     double epsilon = 0.03 * cv::arcLength(contour, true);
     cv::approxPolyDP(contour, approx, epsilon, true);
 
-    switch(approx.size()) {
-    case 3:
-        return std::make_pair("TRIANGLE", TRIANGLE_COLOR);
-    case 4:
-        return std::make_pair("SQUARE", SQUARE_COLOR);
-    case 6:
-        return std::make_pair("ELLIPSE", ELLIPSE_COLOR);
-    case 5:
-    case 7:
-    case 8:
-        if(cv::isContourConvex(contour)) {
-            return std::make_pair("CIRCLE", CIRCLE_COLOR);
+    bool conv = cv::isContourConvex(approx);
+    if(conv) {
+        switch(approx.size()) {
+            case 3:
+                return std::make_pair("TRIANGLE", TRIANGLE_COLOR);
+            case 4:
+                return std::make_pair("SQUARE", SQUARE_COLOR);
+            case 6:
+            case 5:
+            case 7:
+            case 8:
+                if(fabs(cv::minAreaRect(approx).angle - 45) < 5) {
+                    return std::make_pair("ELLIPSE", ELLIPSE_COLOR);
+                } else {
+                    return std::make_pair("CIRCLE", CIRCLE_COLOR);
+                }
+        }
+    } else {
+        auto rect = cv::boundingRect(approx);
+        double aspect = 1.0 * rect.width / rect.height;
+        if(aspect > 1.25 || aspect < 0.9) {
+            return std::make_pair("W", W_COLOR);
         } else {
             return std::make_pair("CROSS", CROSS_COLOR);
         }
-    case 10:
-        return std::make_pair("W", W_COLOR);
-    case 12:
-    case 14:
-    case 15:
-    case 16:
-        return std::make_pair("CROSS", CROSS_COLOR);
-    default:
-        return std::make_pair("UNKNOWN " + std::to_string(approx.size()), UNK_COLOR);
     }
+
+    return std::make_pair("UNKNOWN " + std::to_string(approx.size()) + (conv ? " Conv" : " Non Conv"), UNK_COLOR);
 }
  
 int main() {
